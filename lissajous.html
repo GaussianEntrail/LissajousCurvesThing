@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<h1>LISSAJOUS CURVES ANIMATION</h1>
+		<p>Change the parameters using the fields below and press the ANIMATE! button to see the results of the changes</p>
+		<div id="settingsDiv">
+			<ul>
+				<li>Radius 1:</li>
+				<ul>
+					<li><label for = "inputRx1">X-Radius 1:</label><input type="number" id="inputRx1"></input></li>
+					<li><label for = "inputRy1">Y-Radius 1:</label><input type="number" id="inputRy1"></input></li>
+					<li><label for = "inputNx1">X-frequency 1:</label><input type="number" id="inputNx1"></input></li>
+					<li><label for = "inputNy1">Y-frequency 1:</label><input type="number" id="inputNy1"></input></li>
+				</ul>
+				<li>Radius 2:</li>
+				<ul>
+					<li><label for = "inputRx2">X-Radius 2:</label><input type="number" id="inputRx2"></input></li>
+					<li><label for = "inputRy2">Y-Radius 2:</label><input type="number" id="inputRy2"></input></li>
+					<li><label for = "inputNx2">X-frequency 2:</label><input type="number" id="inputNx2"></input></li>
+					<li><label for = "inputNy2">Y-frequency 2:</label><input type="number" id="inputNy2"></input></li>
+				</ul>			
+				<li>Other:</li>
+				<ul>
+					<li><label for = "inputAnimSpeed">Animation speed: 2π/</label><input type="number" id="inputAnimSpeed"></input> (A higher number means a slower speed)</li>
+					<li><label for = "inputResolution">Number of dots:</label><input type="number" id="inputResolution"></input></li>
+				</ul>			
+			</ul>
+		</div>
+		
+		<canvas id="myCanvas" width = "800" height = "800"></canvas>
+		<script>
+			const canvas = document.getElementById('myCanvas');
+			const ctx = canvas.getContext('2d');
+			
+			//const WIDTH = window.innerWidth;
+			//const HEIGHT = window.innerHeight;
+			
+			//ctx.canvas.width = WIDTH;
+			//ctx.canvas.height = HEIGHT;
+			
+			const WIDTH = (ctx.canvas.width);
+			const HEIGHT = (ctx.canvas.height);
+			
+			const x0 = WIDTH/2;
+			const y0 = HEIGHT/2;
+						
+			
+			const colors = Array(360).fill(0).map( (_, n) => `hsl(${n}, 100%, 50%)`  );
+			
+			var points = [];
+			
+			const generatePoints = (x_func, y_func, rx1 = 240, ry1 = 200, rx2 = 0, ry2 = 0, nx1 = 5,  ny1 = 8, nx2 = 1, ny2 = 3, res, a = 0) => {
+				
+				return Array(res).fill(0).map( (_,t) => ( 
+					{
+						x: x_func(x0, t * ((Math.PI * 2)/res), rx1, rx2, nx1, nx2, a), 
+						y: y_func(y0, t * ((Math.PI * 2)/res), ry1, ry2, ny1, ny2, a)
+					} 
+				)); 
+			}
+			
+			const sin = (t, r, n = 1, a = 0) => r * Math.sin((n * t) + a);
+			const cos = (t, r, n = 1, a = 0) => r * Math.cos((n * t) + a);
+			const tan = (t, r, n = 1, a = 0) => r * Math.tan((n * t) + a);
+			
+			const orbit_sin = (x, t, r1, r2, n1, n2, a = 0)  => x + sin(t, r1, n1, a) + sin(t, r2, n2, a);
+			const orbit_cos = (x, t, r1, r2, n1, n2, a = 0) => x + cos(t, r1, n1, a) + cos(t, r2, n2, a);
+			const orbit_tan = (x, t, r1, r2, n1, n2, a = 0) => x + tan(t, r1, n1, a) + tan(t, r2, n2, a);
+			
+			
+			
+			//SETTINGS
+			var timer = 0, Rx1 = 200, Rx2 = 60, Ry1 = 200, Ry2 = 60, Nx1 = 5, Nx2 = 16, Ny1 = 5, Ny2 = 16, anim_speed = 1000, res = 8000, func_x = orbit_cos, func_y = orbit_sin;
+			
+			const getNumericalValueOfInput = (inputID, defaultValue = 0) => { 
+				var getNum = parseFloat( document.getElementById(inputID).value );
+				return isNaN(getNum) ? defaultValue : getNum;
+			}
+			
+			
+			const changeSettings = () => {
+				timer = 0;
+				
+				Rx1 = getNumericalValueOfInput('inputRx1', 200);
+				Ry1 = getNumericalValueOfInput('inputRy1', 200);
+				Nx1 = getNumericalValueOfInput('inputNx1', 5);
+				Ny1 = getNumericalValueOfInput('inputNy1', 5);
+				
+				
+				Rx2 = getNumericalValueOfInput('inputRx2', 50);
+				Ry2 = getNumericalValueOfInput('inputRy2', 50);
+				Nx2 = getNumericalValueOfInput('inputNx1', 12);
+				Ny2 = getNumericalValueOfInput('inputNy1', 12);
+				
+				res = getNumericalValueOfInput('inputResolution', 2000);
+				anim_speed = getNumericalValueOfInput('inputAnimSpeed', 500);
+			}
+			
+			
+			
+			
+			
+			const draw = () => {
+				timer += (Math.PI * 2)/anim_speed;
+				
+				points = generatePoints(func_x, func_y, Rx1, Ry1, Rx2, Ry2, Nx1, Ny1, Nx2, Ny2, res, timer );
+				
+				ctx.clearRect(0, 0, WIDTH, HEIGHT);
+				ctx.fillStyle = 'black';
+				ctx.fillRect(0, 0, WIDTH, HEIGHT)
+				points.map( (_, p) => {
+					ctx.fillStyle = colors[p % 360];
+					ctx.fillRect(points[p].x, points[p].y, 3, 3)
+				}); 	
+			}
+			
+			changeSettings();
+			setInterval(draw, 1);
+		</script>
+	</body>
+</html>
