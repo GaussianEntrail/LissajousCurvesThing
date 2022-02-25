@@ -5,6 +5,19 @@
 		<p>Change the parameters using the fields below and press the ANIMATE! button to see the results of the changes</p>
 		<div id="settingsDiv">
 			<ul>
+				<li>Functions:</li>
+				<ul>
+					<li><label for = "inputFx">X-function:</label><select id = 'inputFx'>
+						<option value= 0>SIN</option>
+						<option value= 1 selected>COS</option>
+						<option value= 2>TAN</option>
+					</select></li>
+					<li><label for = "inputFy">Y-function:</label><select id = 'inputFy'>
+						<option value= 0 selected>SIN</option>
+						<option value= 1>COS</option>
+						<option value= 2>TAN</option>
+					</select></li>
+				</ul>
 				<li>Radius 1:</li>
 				<ul>
 					<li><label for = "inputRx1">X-Radius 1:</label><input type="number" id="inputRx1"></input></li>
@@ -25,18 +38,14 @@
 					<li><label for = "inputResolution">Number of dots:</label><input type="number" id="inputResolution"></input></li>
 				</ul>			
 			</ul>
+			
+			<input type="button" value="ANIMATE!" onclick="changeSettings()"></input>
 		</div>
 		
 		<canvas id="myCanvas" width = "800" height = "800"></canvas>
 		<script>
 			const canvas = document.getElementById('myCanvas');
 			const ctx = canvas.getContext('2d');
-			
-			//const WIDTH = window.innerWidth;
-			//const HEIGHT = window.innerHeight;
-			
-			//ctx.canvas.width = WIDTH;
-			//ctx.canvas.height = HEIGHT;
 			
 			const WIDTH = (ctx.canvas.width);
 			const HEIGHT = (ctx.canvas.height);
@@ -49,7 +58,7 @@
 			
 			var points = [];
 			
-			const generatePoints = (x_func, y_func, rx1 = 240, ry1 = 200, rx2 = 0, ry2 = 0, nx1 = 5,  ny1 = 8, nx2 = 1, ny2 = 3, res, a = 0) => {
+			const generatePoints = (x_func, y_func, rx1 = 200, ry1 = 200, rx2 = 0, ry2 = 0, nx1 = 5,  ny1 = 8, nx2 = 1, ny2 = 3, res, a = 0) => {
 				
 				return Array(res).fill(0).map( (_,t) => ( 
 					{
@@ -72,14 +81,32 @@
 			//SETTINGS
 			var timer = 0, Rx1 = 200, Rx2 = 60, Ry1 = 200, Ry2 = 60, Nx1 = 5, Nx2 = 16, Ny1 = 5, Ny2 = 16, anim_speed = 1000, res = 8000, func_x = orbit_cos, func_y = orbit_sin;
 			
+			
+			//GET NUMERICAL VALUES FROM INPUTS
 			const getNumericalValueOfInput = (inputID, defaultValue = 0) => { 
-				var getNum = parseFloat( document.getElementById(inputID).value );
+				let getNum = parseFloat( document.getElementById(inputID).value );
 				return isNaN(getNum) ? defaultValue : getNum;
 			}
 			
+			//SET THE GENERATING FUNCTIONS
+			const getDropdownSelection = (dropdownID, defaultValue = orbit_sin) => {
+				let dropdown = document.getElementById(dropdownID);
+				let option = parseInt( dropdown.options[dropdown.selectedIndex].value );
+				
+				if (isNaN(option)) {return defaultValue;}
+				
+				if (option == 0) {return orbit_sin;}
+				if (option == 1) {return orbit_cos;}
+				if (option == 2) {return orbit_tan;}
+				
+			}
 			
 			const changeSettings = () => {
 				timer = 0;
+				
+				func_x = getDropdownSelection('inputFx', orbit_cos);
+				func_y = getDropdownSelection('inputFy', orbit_sin);
+				
 				
 				Rx1 = getNumericalValueOfInput('inputRx1', 200);
 				Ry1 = getNumericalValueOfInput('inputRy1', 200);
