@@ -34,6 +34,7 @@
 				</ul>			
 				<li>Other:</li>
 				<ul>
+					<li><label for = "inputNoise">Noise level: </label><input type="number" id="inputNoise"></input></li>
 					<li><label for = "inputAnimSpeed">Animation speed: 2π/</label><input type="number" id="inputAnimSpeed"></input> (A higher number means a slower speed)</li>
 					<li><label for = "inputResolution">Number of dots:</label><input type="number" id="inputResolution"></input></li>
 				</ul>			
@@ -58,12 +59,24 @@
 			
 			var points = [];
 			
-			const generatePoints = (x_func, y_func, rx1 = 200, ry1 = 200, rx2 = 0, ry2 = 0, nx1 = 5,  ny1 = 8, nx2 = 1, ny2 = 3, res, a = 0) => {
+			const randomization = (level) => {
+				let _level = (level > 10) ? 10 : (level < 0) ? 0 : level;
+				
+				if (_level <= 0) {return 0;}
+				
+				let min = 1 - _level;
+				let max = 1 + _level;
+				let range = max - min;
+				
+				return min + (Math.random() * range);
+			}
+			
+			const generatePoints = (x_func, y_func, rx1 = 200, ry1 = 200, rx2 = 0, ry2 = 0, nx1 = 5,  ny1 = 8, nx2 = 1, ny2 = 3, res, a = 0, noise = 0) => {
 				
 				return Array(res).fill(0).map( (_,t) => ( 
 					{
-						x: x_func(x0, t * ((Math.PI * 2)/res), rx1, rx2, nx1, nx2, a), 
-						y: y_func(y0, t * ((Math.PI * 2)/res), ry1, ry2, ny1, ny2, a)
+						x: x_func(x0, t * ((Math.PI * 2)/res), rx1, rx2, nx1, nx2, a) + randomization(noise), 
+						y: y_func(y0, t * ((Math.PI * 2)/res), ry1, ry2, ny1, ny2, a) + randomization(noise)
 					} 
 				)); 
 			}
@@ -79,7 +92,7 @@
 			
 			
 			//SETTINGS
-			var timer = 0, Rx1 = 200, Rx2 = 60, Ry1 = 200, Ry2 = 60, Nx1 = 5, Nx2 = 16, Ny1 = 5, Ny2 = 16, anim_speed = 1000, res = 8000, func_x = orbit_cos, func_y = orbit_sin;
+			var timer = 0, Rx1 = 200, Rx2 = 60, Ry1 = 200, Ry2 = 60, Nx1 = 5, Nx2 = 16, Ny1 = 5, Ny2 = 16, anim_speed = 1000, res = 8000, func_x = orbit_cos, func_y = orbit_sin, noise = 0.01;
 			
 			
 			//GET NUMERICAL VALUES FROM INPUTS
@@ -119,18 +132,15 @@
 				Nx2 = getNumericalValueOfInput('inputNx2', 12);
 				Ny2 = getNumericalValueOfInput('inputNy2', 12);
 				
+				noise = getNumericalValueOfInput('inputNoise', 0);
 				res = getNumericalValueOfInput('inputResolution', 2000);
 				anim_speed = getNumericalValueOfInput('inputAnimSpeed', 500);
 			}
 			
-			
-			
-			
-			
 			const draw = () => {
 				timer += (Math.PI * 2)/anim_speed;
 				
-				points = generatePoints(func_x, func_y, Rx1, Ry1, Rx2, Ry2, Nx1, Ny1, Nx2, Ny2, res, timer );
+				points = generatePoints(func_x, func_y, Rx1, Ry1, Rx2, Ry2, Nx1, Ny1, Nx2, Ny2, res, timer, noise);
 				
 				ctx.clearRect(0, 0, WIDTH, HEIGHT);
 				ctx.fillStyle = 'black';
